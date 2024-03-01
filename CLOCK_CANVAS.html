@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLOCK_CANVAS</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #clockContainer {
+            text-align: center;
+        }
+
+        canvas {
+            display: none;
+            border: 2px solid black;
+            border-radius: 50%;
+            background-color: #fcca66;
+        }
+    </style>
+</head>
+<body>
+<div id="clockContainer">
+    <input type="number" id="diameterInput" placeholder="Диаметр (200-800)">
+    <button onclick="buildClock()">Построить часы</button>
+</div>
+<canvas id="clockCanvas"></canvas>
+<script>
+    const MIN_DIAMETER = 200;
+    const MAX_DIAMETER = 800;
+    const DEG_TO_RAD = Math.PI / 180;
+
+    let canvas, ctx;
+
+    function buildClock() {
+        const diameterInput = document.getElementById('diameterInput');
+        const diameter = parseInt(diameterInput.value);
+
+        if (isNaN(diameter) || diameter < MIN_DIAMETER || diameter > MAX_DIAMETER) {
+            alert('Введите корректное число от 200 до 800.');
+            return;
+        }
+
+        canvas = document.getElementById('clockCanvas');
+        ctx = canvas.getContext('2d');
+
+        canvas.width = diameter;
+        canvas.height = diameter;
+
+        const centerX = diameter / 2;
+        const centerY = centerX;
+        const radius = diameter * 0.4;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        drawClockFace(centerX, centerY, radius);
+
+        hourHand = createHand(centerX, centerY, diameter * 0.04, diameter * 0.25);
+        minuteHand = createHand(centerX, centerY, diameter * 0.02, diameter * 0.3);
+        secondHand = createHand(centerX, centerY, diameter * 0.01, diameter * 0.35);
+
+        document.querySelector('button').style.display = 'none';
+        document.getElementById('diameterInput').style.display = 'none';
+
+        canvas.style.display = 'block';
+
+        startClock();
+    }
+
+    function drawClockFace(centerX, centerY, radius) {
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = '#fcca66';
+        ctx.fill();
+
+        const fontSize = radius * 0.20;
+        const circleRadius = radius * 0.15;
+        const distanceFromCenter = radius * 1;
+
+        for (let i = 1; i <= 12; i++) {
+            const angle = (i - 3) * 30;
+            const angleRad = angle * DEG_TO_RAD;
+            const x = centerX + Math.cos(angleRad) * distanceFromCenter;
+            const y = centerY + Math.sin(angleRad) * distanceFromCenter;
+
+            ctx.beginPath();
+            ctx.arc(x, y, circleRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = '#48b382';
+            ctx.fill();
+
+            ctx.font = `${fontSize}px Arial`;
+            ctx.fillStyle = 'black';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(i, x, y);
+        }
+    }
+
+    function createHand(centerX, centerY, width, height) {
+        return {
+            centerX: centerX,
+            centerY: centerY,
+            width: width,
+            height: height
+        };
+    }
+
+    function startClock() {
+        updateClock();
+        setInterval(updateClock, 1000);
+    }
+
+    function updateClock() {
+        const now = new Date();
+        const hours = now.getHours() % 12;
+        const minutes = now.getMinutes();
+        const seconds = now.getSeconds();
+
+        const hourAngle = (hours * 30) + (0.5 * minutes);
+        const minuteAngle = (minutes * 6) + (0.1 * seconds);
+        const secondAngle = seconds * 6;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        drawClockFace(canvas.width / 2, canvas.height / 2, canvas.width * 0.4);
+
+        drawHand(hourHand, hourAngle);
+        drawHand(minuteHand, minuteAngle);
+        drawHand(secondHand, secondAngle);
+
+        console.log(`${hours}:${minutes}:${seconds}`);
+    }
+
+    function drawHand(hand, angle) {
+        ctx.save();
+        ctx.translate(hand.centerX, hand.centerY);
+        ctx.rotate(angle * DEG_TO_RAD);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, -hand.height);
+        ctx.lineWidth = hand.width;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = 'black';
+        ctx.stroke();
+        ctx.restore();
+    }
+</script>
+</body>
+</html>
