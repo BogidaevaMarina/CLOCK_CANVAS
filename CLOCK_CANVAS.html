@@ -79,7 +79,7 @@
         ctx.fillStyle = '#fcca66';
         ctx.fill();
 
-        const fontSize = radius * 0.20;
+        const fontSize = radius * 0.20; 
         const circleRadius = radius * 0.15;
         const distanceFromCenter = radius * 1;
 
@@ -94,7 +94,7 @@
             ctx.fillStyle = '#48b382';
             ctx.fill();
 
-            ctx.font = `${fontSize}px Arial`;
+            ctx.font = `${fontSize}px Arial`; 
             ctx.fillStyle = 'black';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -118,11 +118,11 @@
 
     function updateClock() {
         const now = new Date();
-        const hours = now.getHours() % 12;
+        const hours = now.getHours();
         const minutes = now.getMinutes();
         const seconds = now.getSeconds();
 
-        const hourAngle = (hours * 30) + (0.5 * minutes);
+        const hourAngle = (hours % 12 * 30) + (0.5 * minutes);
         const minuteAngle = (minutes * 6) + (0.1 * seconds);
         const secondAngle = seconds * 6;
 
@@ -134,7 +134,15 @@
         drawHand(minuteHand, minuteAngle);
         drawHand(secondHand, secondAngle);
 
-        console.log(`${hours}:${minutes}:${seconds}`);
+        const timeText = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+        ctx.font = 'bold ' + (canvas.width * 0.08) + 'px Arial'; 
+        ctx.fillStyle = 'black';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(timeText, canvas.width / 2, canvas.height / 2 - (canvas.width * 0.1)); 
+
+        console.log(timeText);
     }
 
     function drawHand(hand, angle) {
@@ -146,7 +154,7 @@
         ctx.lineTo(0, -hand.height);
         ctx.lineWidth = hand.width;
         ctx.lineCap = 'round';
-        ctx.strokeStyle = 'black';
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)'; 
         ctx.stroke();
         ctx.restore();
     }
